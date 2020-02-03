@@ -66,6 +66,14 @@ func toCamelCase(str string) string {
 	})
 }
 
+func toLowerCamelCase(str string) string {
+	fmt.Println(strings.ToLower(string([]rune(str)[0])))
+
+	return link.ReplaceAllStringFunc(str, func(s string) string {
+		return strings.ToLower(string([]rune(s)[0])) + strings.ToUpper(strings.Replace(string([]rune(s)[1:]), "_", "", -1))
+	})
+}
+
 func load(filePath string) (*Document, error) {
 	spec, _ := ioutil.ReadFile(filePath)
 	buf := bytes.NewBuffer(spec)
@@ -119,6 +127,8 @@ func genStruct(schemas map[string]*Schema, root *generator.Root) (*generator.Roo
 }
 
 func main() {
+
+	fmt.Println(toLowerCamelCase("aa_aa"))
 	doc, _ := load("./spec/api.yaml")
 
 	root := generator.NewRoot(
