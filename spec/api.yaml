@@ -1,0 +1,43 @@
+openapi: 3.0.0
+components:
+  schemas:
+    OpenAPIStruct:
+      type: object
+      properties:
+        aaa: &ref_1
+          type: string
+        bbb: &ref_2
+          type: integer
+        ccc:
+          type: boolean
+        ddd:
+          type: array
+          items:
+            type: string
+        eee:
+          type: object
+          properties:
+            fff:
+              type: integer
+              minimum: 0
+              maximum: 255
+            ggg:
+              type: string
+              pattern: '^[A-Fa-f0-9]{6}$'
+          required:
+            - ggg
+        hhh:
+          type: array
+          items:
+            type: object
+            properties:
+              iii: *ref_2
+            required:
+              - iii
+          minItems: 1
+        jjj:
+          type: array
+          items:
+            type: string
+          minItems: 1
+          maxItems: 2
