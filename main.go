@@ -4,10 +4,9 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"regexp"
-	"strings"
 
 	"github.com/goccy/go-yaml"
+	"github.com/iancoleman/strcase"
 	"github.com/moznion/gowrtr/generator"
 )
 
@@ -57,23 +56,6 @@ type Schema struct {
 	Extension map[string]interface{}
 }
 
-// https://play.golang.org/p/Ew0IZYWcCQb
-var link = regexp.MustCompile("(^[A-Za-z])|_([A-Za-z])")
-
-func toCamelCase(str string) string {
-	return link.ReplaceAllStringFunc(str, func(s string) string {
-		return strings.ToUpper(strings.Replace(s, "_", "", -1))
-	})
-}
-
-func toLowerCamelCase(str string) string {
-	fmt.Println(strings.ToLower(string([]rune(str)[0])))
-
-	return link.ReplaceAllStringFunc(str, func(s string) string {
-		return strings.ToLower(string([]rune(s)[0])) + strings.ToUpper(strings.Replace(string([]rune(s)[1:]), "_", "", -1))
-	})
-}
-
 func load(filePath string) (*Document, error) {
 	spec, _ := ioutil.ReadFile(filePath)
 	buf := bytes.NewBuffer(spec)
@@ -88,28 +70,28 @@ func load(filePath string) (*Document, error) {
 
 func genStruct(schemas map[string]*Schema, root *generator.Root) (*generator.Root, error) {
 	for k1, v1 := range schemas {
-		oaiStruct := generator.NewStruct(toCamelCase(k1))
+		oaiStruct := generator.NewStruct(strcase.ToCamel(k1))
 		if v1.Type == "object" {
 			for k2, v2 := range v1.Properties {
 				switch v2.Type {
 				case "string":
-					oaiStruct = oaiStruct.AddField(toCamelCase(k2), "string", fmt.Sprintf("json:\"%s\"", k2))
+					oaiStruct = oaiStruct.AddField(strcase.ToCamel(k2), "string", fmt.Sprintf("json:\"%s\"", k2))
 				case "integer":
-					oaiStruct = oaiStruct.AddField(toCamelCase(k2), "int", fmt.Sprintf("json:\"%s\"", k2))
+					oaiStruct = oaiStruct.AddField(strcase.ToCamel(k2), "int", fmt.Sprintf("json:\"%s\"", k2))
 				case "boolean":
-					oaiStruct = oaiStruct.AddField(toCamelCase(k2), "bool", fmt.Sprintf("json:\"%s\"", k2))
+					oaiStruct = oaiStruct.AddField(strcase.ToCamel(k2), "bool", fmt.Sprintf("json:\"%s\"", k2))
 				case "object":
-					oaiStruct = oaiStruct.AddField(toCamelCase(k2), toCamelCase(k2), fmt.Sprintf("json:\"%s\"", k2))
+					oaiStruct = oaiStruct.AddField(strcase.ToCamel(k2), strcase.ToCamel(k2), fmt.Sprintf("json:\"%s\"", k2))
 					m := map[string]*Schema{k2: v2}
 					root, _ = genStruct(m, root)
 				case "array":
 					switch v2.Items.Type {
 					case "string":
-						oaiStruct = oaiStruct.AddField(toCamelCase(k2), "[]string", fmt.Sprintf("json:\"%s\"", k2))
+						oaiStruct = oaiStruct.AddField(strcase.ToCamel(k2), "[]string", fmt.Sprintf("json:\"%s\"", k2))
 					case "integer":
-						oaiStruct = oaiStruct.AddField(toCamelCase(k2), "[]int", fmt.Sprintf("json:\"%s\"", k2))
+						oaiStruct = oaiStruct.AddField(strcase.ToCamel(k2), "[]int", fmt.Sprintf("json:\"%s\"", k2))
 					case "object":
-						oaiStruct = oaiStruct.AddField(toCamelCase(k2), "[]"+toCamelCase(k2), fmt.Sprintf("json:\"%s\"", k2))
+						oaiStruct = oaiStruct.AddField(strcase.ToCamel(k2), "[]"+strcase.ToCamel(k2), fmt.Sprintf("json:\"%s\"", k2))
 						m := map[string]*Schema{k2: v2.Items}
 						root, _ = genStruct(m, root)
 					default:
@@ -127,8 +109,6 @@ func genStruct(schemas map[string]*Schema, root *generator.Root) (*generator.Roo
 }
 
 func main() {
-
-	fmt.Println(toLowerCamelCase("aa_aa"))
 	doc, _ := load("./spec/api.yaml")
 
 	root := generator.NewRoot(

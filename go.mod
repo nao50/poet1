@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/fatih/color v1.9.0 // indirect
 	github.com/goccy/go-yaml v1.2.0
+	github.com/iancoleman/strcase v0.0.0-20191112232945-16388991a334
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/moznion/gowrtr v1.4.1
 	golang.org/x/sys v0.0.0-20200124204421-9fbb57f87de9 // indirect
